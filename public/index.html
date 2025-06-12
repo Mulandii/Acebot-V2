@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head><title>M-Pesa Payment</title></head>
+<body>
+  <h2>Pay with M-Pesa</h2>
+  <input type="text" id="phone" placeholder="Phone number" />
+  <input type="number" id="amount" placeholder="Amount" />
+  <button onclick="pay()">Pay</button>
+  <p id="status"></p>
+
+  <script>
+    async function pay() {
+      const phone = document.getElementById("phone").value;
+      const amount = document.getElementById("amount").value;
+
+      const res = await fetch("/stk-push", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, amount }),
+      });
+
+      const { txid } = await res.json();
+      document.getElementById("status").innerText = "STK sent. Waiting...";
+
+      let tries = 0;
+      const check = setInterval(async () => {
+        const r = await fetch(`/payment-status?txid=${txid}`);
+        const data = await r.json();
+
+        if (data.status === "success") {
+          clearInterval(check);
+          document.getElementById("status").innerText = "✅ Payment successful!";
+        } else if (data.status === "failed") {
+          clearInterval(check);
+          document.getElementById("status").innerText = "❌ Payment failed!";
+        }
+
+        if (++tries > 10) clearInterval(check);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
