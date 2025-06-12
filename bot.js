@@ -1,15 +1,7 @@
-const venom = require('venom-bot');
 const { sendSTKPush } = require('./stk');
 const sessions = {};
 
-venom
-  .create({
-    session: 'acebot', // name for your session
-  })
-  .then((client) => start(client))
-  .catch((err) => console.error('❌ Venom init error:', err));
-
-function start(client) {
+module.exports = function (client) {
   client.onMessage(async (message) => {
     const user = message.from;
     const text = message.body.trim().toLowerCase();
@@ -21,7 +13,10 @@ function start(client) {
     if (!session.started) {
       if (text === '/start') {
         session.started = true;
-        client.sendText(user, `📦 Choose a package:\n1. 55 KSH - 1.25GB till midnight\n2. 20 KSH - 250MB (24hrs)\n3. 23 KSH - 45 mins valid for 3hrs (can buy many)`);
+        client.sendText(
+          user,
+          `📦 Choose a package:\n1. 55 KSH - 1.25GB till midnight\n2. 20 KSH - 250MB (24hrs)\n3. 23 KSH - 45 mins valid for 3hrs (can buy many)`
+        );
         session.step = 'choose_package';
       }
       return;
@@ -36,7 +31,10 @@ function start(client) {
         };
         session.package = text;
         session.amount = { '1': 55, '2': 20, '3': 23 }[text];
-        client.sendText(user, `✅ You chose:\n${packages[text]}\n\nPress 1 to continue or 2 to choose again`);
+        client.sendText(
+          user,
+          `✅ You chose:\n${packages[text]}\n\nPress 1 to continue or 2 to choose again`
+        );
         session.step = 'confirm_package';
       } else {
         client.sendText(user, `❌ Invalid option. Reply 1, 2 or 3.`);
@@ -47,7 +45,10 @@ function start(client) {
         session.step = 'enter_number';
       } else if (text === '2') {
         session.step = 'choose_package';
-        client.sendText(user, `📦 Choose a package:\n1. 55 KSH - 1.25GB till midnight\n2. 20 KSH - 250MB (24hrs)\n3. 23 KSH - 45 mins valid for 3hrs (can buy many)`);
+        client.sendText(
+          user,
+          `📦 Choose a package:\n1. 55 KSH - 1.25GB till midnight\n2. 20 KSH - 250MB (24hrs)\n3. 23 KSH - 45 mins valid for 3hrs (can buy many)`
+        );
       } else {
         client.sendText(user, `❌ Reply 1 to continue or 2 to change your selection.`);
       }
@@ -73,4 +74,4 @@ function start(client) {
       }
     }
   });
-}
+};
