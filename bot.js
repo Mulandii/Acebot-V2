@@ -42,7 +42,7 @@ module.exports = function (client) {
 
     else if (session.step === 'confirm_package') {
       if (text === '1') {
-        client.sendText(user, `📱 Enter the phone number to pay with (07XXXXXXXX):`);
+        client.sendText(user, `📱Hello Enter the phone number to pay with (07XXXXXXXX):`);
         session.step = 'enter_number';
       } else if (text === '2') {
         session.step = 'choose_package';
@@ -79,4 +79,3 @@ module.exports = function (client) {
     }
   });
 };
-

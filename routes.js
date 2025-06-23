@@ -51,4 +51,3 @@ router.post("/stk-push", express.json(), async (req, res) => {
 });
 
 module.exports = router;
-
