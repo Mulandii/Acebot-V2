@@ -131,3 +131,18 @@ dist
 
 # Replit debugger
 .breakpoints
+# 🔐 M-Pesa and Venom-bot security files
+tokens/
+*.ldb
+
+# Prevent accidentally leaking your env variables
+.env
+
+# Replit project config (optional)
+.replit
+
+# Cache & lock file cleanup
+*.pid
+*.pem
+*.key
+*.sqlite
