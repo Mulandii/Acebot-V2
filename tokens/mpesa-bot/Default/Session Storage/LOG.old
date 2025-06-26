@@ -1,2 +1,5 @@
-2025/06/23-12:30:30.479 1c7d Creating DB /root/Ace-Mpesa-bot/tokens/mpesa-bot/Default/Session Storage since it was missing.
-2025/06/23-12:30:30.490 1c7d Delete type=3 #1
+2025/06/23-14:04:17.081 297e Recovering log #6
+2025/06/23-14:04:17.082 297e Level-0 table #8: started
+2025/06/23-14:04:17.084 297e Level-0 table #8: 321 bytes OK
+2025/06/23-14:04:17.091 297e Delete type=0 #6
+2025/06/23-14:04:17.091 297e Delete type=3 #4

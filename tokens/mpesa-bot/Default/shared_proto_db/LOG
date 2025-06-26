@@ -1,3 +1,5 @@
-2025/06/23-12:32:51.997 1d3c Recovering log #3
-2025/06/23-12:32:52.002 1d3c Delete type=0 #3
-2025/06/23-12:32:52.002 1d3c Delete type=3 #2
+2025/06/26-10:46:11.590 6af Recovering log #8
+2025/06/26-10:46:11.621 6af Level-0 table #10: started
+2025/06/26-10:46:11.621 6af Level-0 table #10: 0 bytes OK
+2025/06/26-10:46:11.699 6af Delete type=0 #8
+2025/06/26-10:46:11.699 6af Delete type=3 #6

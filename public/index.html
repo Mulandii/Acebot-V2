@@ -1,43 +1,493 @@
 <!DOCTYPE html>
-<html>
-<head><title>M-Pesa Payment</title></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Josh Comm Deals - Premium Data & Voice Packages</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="Premium data and voice packages with instant activation. Pay via M-Pesa for immediate service.">
+</head>
 <body>
-  <h2>Pay with M-Pesa</h2>
-  <input type="text" id="phone" placeholder="Phone number" />
-  <input type="number" id="amount" placeholder="Amount" />
-  <button onclick="pay()">Pay</button>
-  <p id="status"></p>
+    <div class="app-container">
+        <div class="main-card">
+            <div class="header">
+                <div class="header-content">
+                    <h1>Josh Comm Deals</h1>
+                    <p class="subtitle">Premium connectivity solutions.<br>Instant activation. Seamless experience.</p>
+                    <div class="till-badge">
+                        💳 M-Pesa Till: 8498618
+                    </div>
+                </div>
+            </div>
 
-  <script>
-    async function pay() {
-      const phone = document.getElementById("phone").value;
-      const amount = document.getElementById("amount").value;
+            <div class="content">
+                <!-- Data Bundles - Multiple Purchase -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon">📊</div>
+                        <h2 class="section-title">Data Bundles</h2>
+                    </div>
+                    <div class="packages-grid" id="dataMultipleGrid"></div>
+                </div>
 
-      const res = await fetch("/stk-push", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, amount }),
-      });
+                <!-- Voice Minutes -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon">📞</div>
+                        <h2 class="section-title">Voice Minutes</h2>
+                    </div>
+                    <div class="packages-grid" id="voiceGrid"></div>
+                </div>
 
-      const { txid } = await res.json();
-      document.getElementById("status").innerText = "STK sent. Waiting...";
+                <!-- Daily Data Bundles -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon">⏰</div>
+                        <h2 class="section-title">Daily Data Packages</h2>
+                    </div>
+                    <div class="packages-grid" id="dataDailyGrid"></div>
+                </div>
 
-      let tries = 0;
-      const check = setInterval(async () => {
-        const r = await fetch(`/payment-status?txid=${txid}`);
-        const data = await r.json();
+                <!-- SMS Packages -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-icon">💬</div>
+                        <h2 class="section-title">SMS Packages</h2>
+                    </div>
+                    <div class="packages-grid" id="smsGrid"></div>
+                </div>
 
-        if (data.status === "success") {
-          clearInterval(check);
-          document.getElementById("status").innerText = "✅ Payment successful!";
-        } else if (data.status === "failed") {
-          clearInterval(check);
-          document.getElementById("status").innerText = "❌ Payment failed!";
+                <div class="note">
+                    <strong>Important:</strong> Pay the exact amount to till number 8498618 for instant activation. Your phone number must be registered with M-Pesa.
+                </div>
+
+                <!-- Payment Form -->
+                <div class="form-section">
+                    <div class="input-group">
+                        <label for="phone" class="input-label">Phone Number</label>
+                        <p class="input-hint">Enter your number: 0768827490 or 254768827490</p>
+                        <input type="tel" id="phone" class="input-field" placeholder="0768827490 or 254768827490" maxlength="12">
+                    </div>
+
+                    <div class="amount-display" id="amountDisplay">
+                        <div class="amount-label">Amount to Pay</div>
+                        <div class="amount-value" id="selectedAmount">KSh 0</div>
+                    </div>
+
+                    <button class="pay-button" id="payButton" onclick="pay()" disabled>
+                        Select Package & Enter Phone Number
+                    </button>
+
+                    <div class="status-card" id="status"></div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <div class="contact-info">
+                    <strong>Need assistance?</strong>
+                    Call: 0795414740 | WhatsApp Available<br>
+                    <small>Additional Services: Airtime to M-Pesa | Business Solutions</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Checkout Button -->
+        <button class="floating-checkout" id="floatingCheckout" onclick="openPhoneModal()">
+            <div class="floating-checkout-content">
+                <div class="floating-checkout-amount" id="floatingAmount">KSh 0</div>
+                <div class="floating-checkout-text">Complete Purchase</div>
+            </div>
+        </button>
+
+        <!-- Phone Input Modal -->
+        <div class="phone-modal" id="phoneModal">
+            <div class="phone-modal-content">
+                <div class="phone-modal-header">
+                    <div class="phone-modal-title">Complete Payment</div>
+                    <div class="phone-modal-subtitle">Amount: <span id="modalAmount">KSh 0</span></div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="modalPhone" class="input-label">Phone Number</label>
+                    <p class="input-hint">Enter your number: 0712345678 or 254712345678</p>
+                    <input type="tel" id="modalPhone" class="input-field" placeholder="0712345678 or 254712345678" maxlength="12">
+                </div>
+
+                <div class="phone-modal-buttons">
+                    <button class="modal-button modal-button-cancel" onclick="closePhoneModal()">Cancel</button>
+                    <button class="modal-button modal-button-pay" id="modalPayButton" onclick="payFromModal()" disabled>Pay Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div class="confirmation-modal" id="confirmationModal">
+            <div class="confirmation-modal-content">
+                <div class="confirmation-modal-header">
+                    <div class="confirmation-modal-title">Confirm Payment</div>
+                    <div class="confirmation-modal-subtitle">Review your order details</div>
+                </div>
+                
+                <div class="confirmation-details">
+                    <div class="confirmation-detail">
+                        <span class="confirmation-label">Package:</span>
+                        <span class="confirmation-value" id="confirmPackage">-</span>
+                    </div>
+                    <div class="confirmation-detail">
+                        <span class="confirmation-label">Phone Number:</span>
+                        <span class="confirmation-value" id="confirmPhone">-</span>
+                    </div>
+                    <div class="confirmation-detail">
+                        <span class="confirmation-label">Amount:</span>
+                        <span class="confirmation-amount" id="confirmAmount">KSh 0</span>
+                    </div>
+                </div>
+
+                <div class="confirmation-modal-buttons">
+                    <button class="modal-button modal-button-cancel" onclick="closeConfirmationModal()">Cancel</button>
+                    <button class="modal-button modal-button-confirm" id="confirmPayButton" onclick="proceedWithPayment()">
+                        <span class="loading-spinner hidden" id="confirmSpinner"></span>
+                        Confirm & Pay
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Package data structure
+        const packages = {
+            dataMultiple: [
+                { price: 23, name: '1GB Data', description: 'Valid for 1 hour' },
+                { price: 53, name: '1.5GB Data', description: 'Valid for 3 hours' },
+                { price: 105, name: '2GB Data', description: 'Valid for 24 hours' }
+            ],
+            voice: [
+                { price: 22, name: '45 Minutes', description: 'Valid for 3 hours' },
+                { price: 51, name: '50 Minutes', description: 'Valid till midnight' }
+            ],
+            dataDaily: [
+                { price: 19, name: '1GB Data', description: 'Valid for 1 hour' },
+                { price: 20, name: '250MB Data', description: 'Valid for 24 hours' },
+                { price: 49, name: '350MB Data', description: 'Valid for 7 days' },
+                { price: 50, name: '1.5GB Data', description: 'Valid for 3 hours' },
+                { price: 55, name: '1.25GB Data', description: 'Valid till midnight' },
+                { price: 99, name: '1GB Data', description: 'Valid for 24 hours' },
+                { price: 300, name: '2.5GB Data', description: 'Valid for 7 days' },
+                { price: 700, name: '6GB Data', description: 'Valid for 7 days' }
+            ],
+            sms: [
+                { price: 5, name: '20 SMS', description: 'Valid for 24 hours' },
+                { price: 10, name: '200 SMS', description: 'Valid for 24 hours' },
+                { price: 21, name: '100 SMS', description: 'Valid for 1 week' },
+                { price: 30, name: '1,000 SMS', description: 'Valid for 1 week' },
+                { price: 101, name: '1,500 SMS', description: 'Valid for 30 days' }
+            ]
+        };
+
+        let selectedPackageAmount = 0;
+        let selectedPackageInfo = { name: '', description: '' };
+
+        // Create package card HTML
+        function createPackageCard(pkg, gridType) {
+            return `
+                <div class="package-card" onclick="selectPackage(this, ${pkg.price}, '${pkg.name}', '${pkg.description}')">
+                    <input type="radio" name="package-${gridType}" value="${pkg.price}" class="hidden">
+                    <div class="package-header">
+                        <div class="package-info">
+                            <h3>${pkg.name}</h3>
+                            <p>${pkg.description}</p>
+                        </div>
+                        <div class="package-price">KSh ${pkg.price}</div>
+                    </div>
+                </div>
+            `;
         }
 
-        if (++tries > 10) clearInterval(check);
-      }, 3000);
-    }
-  </script>
+        // Initialize packages
+        function initializePackages() {
+            document.getElementById('dataMultipleGrid').innerHTML = 
+                packages.dataMultiple.map(pkg => createPackageCard(pkg, 'data-multiple')).join('');
+            
+            document.getElementById('voiceGrid').innerHTML = 
+                packages.voice.map(pkg => createPackageCard(pkg, 'voice')).join('');
+            
+            document.getElementById('dataDailyGrid').innerHTML = 
+                packages.dataDaily.map(pkg => createPackageCard(pkg, 'data-daily')).join('');
+            
+            document.getElementById('smsGrid').innerHTML = 
+                packages.sms.map(pkg => createPackageCard(pkg, 'sms')).join('');
+        }
+
+        function selectPackage(element, amount, name, description) {
+            // Remove selection from all packages
+            document.querySelectorAll('.package-card').forEach(pkg => pkg.classList.remove('selected'));
+            
+            // Add selection to clicked package
+            element.classList.add('selected');
+            element.querySelector('input[type="radio"]').checked = true;
+            
+            // Update selected amount and info
+            selectedPackageAmount = amount;
+            selectedPackageInfo = { name, description };
+            
+            document.getElementById('selectedAmount').textContent = `KSh ${amount}`;
+            document.getElementById('amountDisplay').style.display = 'block';
+            
+            // Update pay button and floating checkout
+            updatePayButton();
+            showFloatingCheckout(amount);
+        }
+
+        function showFloatingCheckout(amount) {
+            const floatingCheckout = document.getElementById('floatingCheckout');
+            const floatingAmount = document.getElementById('floatingAmount');
+            
+            floatingAmount.textContent = `KSh ${amount}`;
+            floatingCheckout.classList.add('show');
+        }
+
+        function formatPhoneNumber(phone) {
+            // Remove all non-digits
+            let cleaned = phone.replace(/\D/g, '');
+            
+            // Handle different input formats - convert to 254XXXXXXXXX
+            if (cleaned.startsWith('0')) {
+                // Convert 07XXXXXXXX to 2547XXXXXXXX
+                cleaned = '254' + cleaned.substring(1);
+            } else if (!cleaned.startsWith('254')) {
+                // If doesn't start with 254 and not 0, assume it needs 254 prefix
+                if (cleaned.length === 9) {
+                    cleaned = '254' + cleaned;
+                }
+            }
+            
+            return cleaned.length === 12 ? cleaned : null;
+        }
+
+        function validatePhoneNumber(phone) {
+            const formatted = formatPhoneNumber(phone);
+            return formatted && /^254[0-9]{9}$/.test(formatted);
+        }
+
+        // Modal functions
+        function openPhoneModal() {
+            const modal = document.getElementById('phoneModal');
+            document.getElementById('modalAmount').textContent = `KSh ${selectedPackageAmount}`;
+            modal.classList.add('show');
+            
+            // Copy phone number from main form if exists
+            const mainPhone = document.getElementById('phone').value;
+            if (mainPhone) {
+                document.getElementById('modalPhone').value = mainPhone;
+                updateModalPayButton();
+            }
+            
+            document.getElementById('modalPhone').focus();
+        }
+
+        function closePhoneModal() {
+            document.getElementById('phoneModal').classList.remove('show');
+        }
+
+        function openConfirmationModal(phone, amount, packageInfo) {
+            document.getElementById('confirmPackage').textContent = `${packageInfo.name} - ${packageInfo.description}`;
+            document.getElementById('confirmPhone').textContent = phone;
+            document.getElementById('confirmAmount').textContent = `KSh ${amount}`;
+            document.getElementById('confirmationModal').classList.add('show');
+        }
+
+        function closeConfirmationModal() {
+            document.getElementById('confirmationModal').classList.remove('show');
+        }
+
+        // Button update functions
+        function updateModalPayButton() {
+            const phone = document.getElementById('modalPhone').value;
+            const button = document.getElementById('modalPayButton');
+            
+            if (validatePhoneNumber(phone)) {
+                button.disabled = false;
+                button.textContent = `Pay KSh ${selectedPackageAmount}`;
+            } else {
+                button.disabled = true;
+                button.textContent = 'Enter Valid Phone Number';
+            }
+        }
+
+        function updatePayButton() {
+            const phone = document.getElementById('phone').value;
+            const button = document.getElementById('payButton');
+            
+            if (selectedPackageAmount > 0 && validatePhoneNumber(phone)) {
+                button.disabled = false;
+                button.textContent = `Pay KSh ${selectedPackageAmount}`;
+            } else if (selectedPackageAmount > 0) {
+                button.disabled = true;
+                button.textContent = 'Enter Valid Phone Number';
+            } else {
+                button.disabled = true;
+                button.textContent = 'Select Package & Enter Phone Number';
+            }
+        }
+
+        // Phone input handlers
+        function setupPhoneInputs() {
+            const phoneInputs = ['phone', 'modalPhone'];
+            
+            phoneInputs.forEach(inputId => {
+                document.getElementById(inputId).addEventListener('input', function() {
+                    const otherInputId = inputId === 'phone' ? 'modalPhone' : 'phone';
+                    
+                    // Sync values between inputs
+                    document.getElementById(otherInputId).value = this.value;
+                    
+                    // Update respective buttons
+                    if (inputId === 'phone') {
+                        updatePayButton();
+                    } else {
+                        updateModalPayButton();
+                    }
+                });
+            });
+        }
+
+        // Payment functions
+        async function payFromModal() {
+            const phone = document.getElementById("modalPhone").value;
+            const formattedPhone = formatPhoneNumber(phone);
+
+            if (!validatePhoneNumber(phone)) {
+                alert("Please enter a valid phone number");
+                return;
+            }
+
+            closePhoneModal();
+            openConfirmationModal(formattedPhone, selectedPackageAmount, selectedPackageInfo);
+        }
+
+        async function pay() {
+            const phone = document.getElementById("phone").value;
+            const formattedPhone = formatPhoneNumber(phone);
+
+            if (!selectedPackageAmount || !validatePhoneNumber(phone)) {
+                if (!selectedPackageAmount) {
+                    alert("Please select a package first");
+                } else {
+                    alert("Please enter a valid phone number");
+                }
+                return;
+            }
+
+            openConfirmationModal(formattedPhone, selectedPackageAmount, selectedPackageInfo);
+        }
+
+        async function proceedWithPayment() {
+            const phone = document.getElementById('confirmPhone').textContent;
+            const amount = selectedPackageAmount;
+
+            const confirmButton = document.getElementById('confirmPayButton');
+            const spinner = document.getElementById('confirmSpinner');
+            
+            // Show loading state
+            confirmButton.disabled = true;
+            spinner.classList.remove('hidden');
+            confirmButton.innerHTML = '<span class="loading-spinner"></span> Processing...';
+
+            try {
+                const res = await fetch("/stk-push", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ phone, amount }),
+                });
+
+                const { txid } = await res.json();
+                
+                closeConfirmationModal();
+                
+                // Update main form with confirmed values
+                document.getElementById('phone').value = phone;
+                
+                const statusDiv = document.getElementById("status");
+                statusDiv.className = "status-card status-waiting";
+                statusDiv.style.display = "block";
+                statusDiv.innerHTML = `
+                    <div class="loading-spinner" style="margin: 0 auto 1rem;"></div>
+                    STK Push sent to ${phone}<br>
+                    Please enter your M-Pesa PIN to complete payment
+                `;
+
+                let tries = 0;
+                const check = setInterval(async () => {
+                    try {
+                        const r = await fetch(`/payment-status?txid=${txid}`);
+                        const data = await r.json();
+
+                        if (data.status === "success") {
+                            clearInterval(check);
+                            statusDiv.className = "status-card status-success";
+                            statusDiv.innerHTML = `
+                                <div class="success-checkmark" style="margin: 0 auto 1rem;"></div>
+                                ✅ Payment successful!<br>
+                                Your ${selectedPackageInfo.name} package will be activated shortly.
+                            `;
+                            
+                            setTimeout(() => location.reload(), 4000);
+                        } else if (data.status === "failed") {
+                            clearInterval(check);
+                            statusDiv.className = "status-card status-failed";
+                            statusDiv.innerHTML = "❌ Payment failed!<br>Please try again or contact support at 0795414740";
+                            
+                            document.getElementById('payButton').disabled = false;
+                            document.getElementById('payButton').textContent = `Pay KSh ${amount}`;
+                        }
+
+                        if (++tries > 12) {
+                            clearInterval(check);
+                            statusDiv.className = "status-card status-failed";
+                            statusDiv.innerHTML = "⏰ Payment timeout.<br>Please check your M-Pesa messages or try again.";
+                            
+                            document.getElementById('payButton').disabled = false;
+                            document.getElementById('payButton').textContent = `Pay KSh ${amount}`;
+                        }
+                    } catch (error) {
+                        console.error('Status check error:', error);
+                    }
+                }, 3000);
+            } catch (error) {
+                console.error('Payment error:', error);
+                closeConfirmationModal();
+                
+                const statusDiv = document.getElementById("status");
+                statusDiv.className = "status-card status-failed";
+                statusDiv.style.display = "block";
+                statusDiv.innerHTML = "❌ Connection error.<br>Please check your internet and try again.";
+                
+                document.getElementById('payButton').disabled = false;
+                document.getElementById('payButton').textContent = `Pay KSh ${selectedPackageAmount}`;
+            }
+        }
+
+        // Event listeners for closing modals
+        function setupModalEventListeners() {
+            ['phoneModal', 'confirmationModal'].forEach(modalId => {
+                document.getElementById(modalId).addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('show');
+                    }
+                });
+            });
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePackages();
+            setupPhoneInputs();
+            setupModalEventListeners();
+        });
+    </script>
 </body>
 </html>
